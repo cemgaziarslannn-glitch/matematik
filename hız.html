@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Hızlı Okuma Testi</title>
+<style>
+  :root{
+    --pink: #ffe6f0;
+    --accent: #b30059;
+    --btn: #ff99cc;
+    --btn-hover: #ff66b3;
+    --green: #4CAF50;
+  }
+  body{
+    margin:0;
+    font-family: "Times New Roman", Times, serif;
+    background: var(--pink);
+    color: var(--accent);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px;
+    min-height:100vh;
+    box-sizing:border-box;
+    position:relative;
+  }
+  h1{ font-size:2.2rem; margin:8px 0 14px; text-align:center; }
+  .controls, .status, .history { width:100%; max-width:900px; background:#fff0f6; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(179,0,89,0.12); margin-bottom:12px; }
+  label{ font-weight:bold; margin-right:8px; }
+  select, input[type=radio] { margin-right:8px; }
+  .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .btn{
+    background:var(--btn);
+    border:none;
+    color:white;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:1rem;
+    box-shadow:0 4px 8px rgba(255,102,180,0.4);
+  }
+  .btn:hover{ background:var(--btn-hover); }
+  .btn.secondary{ background:transparent; color:var(--accent); border:2px solid var(--btn); }
+  .timer{ font-weight:bold; font-size:1.4rem; color:var(--accent); }
+  #storyBox{ margin-top:12px; padding:14px; border-radius:10px; background:white; min-height:160px; font-size:1.3rem; line-height:1.4; }
+  .word{ display:inline-block; margin:2px 4px; padding:4px 6px; border-radius:8px; cursor:default; user-select:none; font-size:1.3rem; }
+  .word.clickable{ cursor:pointer; background:#fff6fb; transition:background 0.15s, transform 0.05s; }
+  .word.clickable:hover{ background:#ffe0f0; transform:translateY(-2px); }
+  .word.selected{ background:var(--green); color:white; }
+  .info{ margin-top:10px; font-weight:bold; }
+  .historyList{ margin-top:8px; font-size:0.95rem; max-height:160px; overflow:auto; }
+  @media (max-width:520px){
+    h1{ font-size:1.6rem; }
+    .controls, .status, .history{ padding:10px; }
+    #storyBox{ font-size:1.1rem; min-height:220px; }
+    .word{ font-size:1.1rem; }
+  }
+
+  /* Sağ alt köşedeki artı (+) butonu */
+  #addStoryBtn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 48px;
+    height: 48px;
+    font-size: 36px;
+    font-weight: bold;
+    color: white;
+    background: var(--btn);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(255,102,180,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select:none;
+  }
+  #addStoryBtn:hover {
+    background: var(--btn-hover);
+  }
+
+  /* Hikaye ekleme bölümü (başta gizli) */
+  #storyAddContainer {
+    position: fixed;
+    right: 20px;
+    bottom: 80px;
+    width: 320px;
+    max-width: 90vw;
+    background: #fff0f6;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(179,0,89,0.2);
+    padding: 14px;
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+  }
+  #storyAddContainer label {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  #storyAddContainer input[type="text"], #storyAddContainer textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 2px solid var(--btn);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 1rem;
+    resize: vertical;
+  }
+  #storyAddContainer textarea {
+    min-height: 80px;
+  }
+  #storyAddContainer .btnGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* Sil butonu yanına eklendi */
+  #deleteStoryBtn {
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--btn);
+    font-size: 0.9rem;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: none;
+  }
+  #deleteStoryBtn:hover {
+    background: var(--btn-hover);
+    color: white;
+  }
+
+  /* Küçük buton stili */
+  .btn.small {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  /* Yıldız ve puan kutusu sağ üst köşe */
+  #starScore {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+    background: var(--btn);
+    color: white;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(255,102,180,0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select:none;
+    z-index: 10000;
+  }
+  #starScore .star {
+    font-size: 1.4rem;
+    color: gold;
+  }
+
+  /* Anasayfa butonu sağ üst köşe, yıldızın yanında */
+  #homeBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 42px;
+    height: 42px;
+    background: var(--btn);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(255,102,180,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    color: white;
+    user-select:none;
+    transition: background 0.3s ease;
+    z-index: 10001;
+  }
+  #homeBtn:hover {
+    background: var(--btn-hover);
+  }
+</style>
+</head>
+<body>
+
+<h1>Hızlı Okuma Testi</h1>
+
+<div class="controls" id="controls">
+  <div class="row" style="align-items:center; gap:8px;">
+    <label for="storySelect">Hikaye seç:</label>
+    <select id="storySelect"></select>
+    <button id="deleteStoryBtn" title="Seçili hikayeyi sil">Sil</button>
+
+    <label>Süre:</label>
+    <label><input type="radio" name="duration" value="60"> 1 dakika</label>
+    <label><input type="radio" name="duration" value="120" checked> 2 dakika</label>
+    <label><input type="radio" name="duration" value="180"> 3 dakika</label>
+
+    <button class="btn small" id="startBtn">Başla</button>
+    <button class="btn small secondary" id="resetBtn">Sıfırla</button>
+  </div>
+
+  <div style="margin-top:10px; font-size:0.95rem; color:var(--accent);">
+    Açıklama: Süre başladıktan sonra hikayeyi oku. Süre dolunca kelimeler tıklanabilir olacak — okuduğun kelimeyi seç. Seçince otomatik olarak kaç kelime okuduğun hesaplanıp kaydedilecek.
+  </div>
+</div>
+
+<div class="status">
+  <div class="row" style="justify-content:space-between; align-items:center;">
+    <div><span style="font-weight:bold">Seçili hikaye:</span> <span id="currentTitle">-</span></div>
+    <div class="timer" id="timerDisplay">00:00</div>
+  </div>
+
+  <div id="storyBox" aria-live="polite"></div>
+
+  <div class="info" id="afterInfo" style="display:none;"></div>
+</div>
+
+<div class="history">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <div style="font-weight:bold">Kaydedilen sonuçlar</div>
+    <div><button class="btn secondary" id="clearHistoryBtn">Geçmişi Temizle</button></div>
+  </div>
+  <div class="historyList" id="historyList">
+    <!-- geçmiş kayıtlar buraya -->
+  </div>
+</div>
+
+<!-- Sağ alt köşedeki + butonu -->
+<button id="addStoryBtn" aria-label="Hikaye ekle">+</button>
+
+<!-- Anasayfa Butonu sağ üst köşede -->
+<button id="homeBtn" aria-label="Anasayfa" title="Anasayfa">🏠</button>
+
+<!-- Yıldız ve puan kutusu sağ üst köşede -->
+<div id="starScore" aria-live="polite" aria-atomic="true">
+  <span class="star">★</span> <span id="scoreValue">0</span>
+</div>
+
+<!-- Hikaye ekleme kutusu -->
+<div id="storyAddContainer" aria-hidden="true">
+  <label for="newStoryTitle">Hikaye Başlığı:</label>
+  <input type="text" id="newStoryTitle" placeholder="Başlık yazınız..." />
+  <label for="newStoryText">Hikaye Metni:</label>
+  <textarea id="newStoryText" placeholder="Hikayeyi buraya yapıştırınız..."></textarea>
+  <div class="btnGroup">
+    <button class="btn secondary" id="cancelAddStoryBtn" type="button">İptal</button>
+    <button class="btn" id="saveStoryBtn" type="button">Kaydet</button>
+  </div>
+</div>
+
+<script>
+/* --- Hikayeler --- */
+let STORIES = [
+  
+ 
+  {
+    id: 'ornek',
+    title: 'Çirkin Ördek Yavrusu',
+    text:
+`Anne ördek sabırla yumurtalarının kırılmasını bekliyormuş. Vakit gelince ördek yavruları yumurtalarından çıkmaya başlamışlar. Fakat en son ve en büyük yumurta bir türlü kırılmıyormuş. Sonunda yumurtanın kabuğu çatlamış. Diğerlerinden daha gri ve farklı olan ördek yavrusunun küçük kafası görünmüş. Kümesin hayvanları onunla alay etmişler. Zavallı yavru uzaklara gitmeye karar vermiş.
+
+Günlerce yürümüş, gece uyumuş. Ertesi sabah su sesleriyle gözlerini açmış; bir göl kıyısında uyanmış. Günler geçtikçe değişmiş; kuğuları gördükçe iç çekmiş. İlkbaharda bir kuğu sürüsü gelmiş ve yavru, kendisini sudaki yansımada görüp şaşırmış: güzel bir kuğuya dönüşmüş olduğunu fark etmiş. Kuğu sürüsüne katılmış ve mutlu olmuş.`
+  },
+  {
+    id: 'kaplumb',
+    title: 'Kaplumbağa ile Tavşan',
+    text:
+`Ormanların birinde kendisiyle çok övünen bir tavşan varmış. “Bu ormanda benden hızlı koşan yoktur.” diye hava atıyormuş. Kaplumbağa bir gün; “Seninle yarışayım,” demiş. Tavşan gülmüş ama yarışı kabul etmiş.
+
+Yarış başlamış. Tavşan çok hızlı başlamış, sonra dinlenmek için bir ağacın dibine uzanıp uyumuş. Kaplumbağa yavaş ama istikrarlı bir şekilde ilerlemiş. Tavşan uyuyunca kaplumbağa yarışı bitirmiş. Kaplumbağa kazanmış ve tavşana dersini vermiş: “Hiçbir zaman kendini başkalarından üstün görme.”`
+  }
+];
+
+/* --- DOM elemanları --- */
+const storySelect = document.getElementById('storySelect');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const timerDisplay = document.getElementById('timerDisplay');
+const storyBox = document.getElementById('storyBox');
+const currentTitle = document.getElementById('currentTitle');
+const afterInfo = document.getElementById('afterInfo');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const historyList = document.getElementById('historyList');
+const addStoryBtn = document.getElementById('addStoryBtn');
+const storyAddContainer = document.getElementById('storyAddContainer');
+const newStoryTitle = document.getElementById('newStoryTitle');
+const newStoryText = document.getElementById('newStoryText');
+const cancelAddStoryBtn = document.getElementById('cancelAddStoryBtn');
+const saveStoryBtn = document.getElementById('saveStoryBtn');
+const deleteStoryBtn = document.getElementById('deleteStoryBtn');
+const starScore = document.getElementById('starScore');
+const scoreValue = document.getElementById('scoreValue');
+const homeBtn = document.getElementById('homeBtn');
+
+/* --- Değişkenler --- */
+let timer = null;
+let duration = 120; // saniye, varsayılan 2 dk
+let timeLeft = duration;
+let running = false;
+let words = [];
+let selectedWordIndex = -1;
+let clickedConfirmed = false;
+let history = [];
+let score = 0;
+
+/* --- Yükleme --- */
+function init() {
+  // Hikayeleri dropdown'a ekle
+  STORIES.forEach(story => {
+    const option = document.createElement('option');
+    option.value = story.id;
+    option.textContent = story.title;
+    storySelect.appendChild(option);
+  });
+
+  // Localstoragedan geçmiş ve skor oku
+  loadHistory();
+  loadScore();
+
+  // İlk hikayeyi seç ve göster
+  if(STORIES.length > 0){
+    storySelect.value = STORIES[0].id;
+    displayStory(STORIES[0].text);
+    currentTitle.textContent = STORIES[0].title;
+  }
+
+  // Süre seçimi eventleri
+  document.querySelectorAll('input[name="duration"]').forEach(radio=>{
+    radio.addEventListener('change', e=>{
+      duration = parseInt(e.target.value);
+      if(!running){
+        timeLeft = duration;
+        updateTimerDisplay(timeLeft);
+      }
+    });
+  });
+
+  updateTimerDisplay(timeLeft);
+
+  // Eventler
+  startBtn.addEventListener('click', startTest);
+  resetBtn.addEventListener('click', resetTest);
+  storySelect.addEventListener('change', onStoryChange);
+  clearHistoryBtn.addEventListener('click', clearHistory);
+  addStoryBtn.addEventListener('click', toggleAddStory);
+  cancelAddStoryBtn.addEventListener('click', cancelAddStory);
+  saveStoryBtn.addEventListener('click', saveNewStory);
+  deleteStoryBtn.addEventListener('click', deleteSelectedStory);
+  homeBtn.addEventListener('click', ()=>{window.location.href = 'index.html';});
+}
+window.onload = init;
+
+/* --- Fonksiyonlar --- */
+function displayStory(text){
+  storyBox.innerHTML = '';
+  words = text.split(/\s+/).filter(w=>w.length>0);
+  words.forEach((word, idx)=>{
+    const span = document.createElement('span');
+    span.textContent = word;
+    span.className = 'word';
+    storyBox.appendChild(span);
+    if(idx < words.length - 1){
+      storyBox.appendChild(document.createTextNode(' '));
+    }
+  });
+  selectedWordIndex = -1;
+  clickedConfirmed = false;
+  afterInfo.style.display = 'none';
+  storyBox.style.backgroundColor = '#fff'; // normal
+  // clickable sınıfı kaldır
+  removeClickable();
+}
+
+function removeClickable(){
+  storyBox.querySelectorAll('.word.clickable').forEach(w=>{
+    w.classList.remove('clickable');
+    w.onclick = null;
+  });
+}
+function makeWordsClickable(){
+  storyBox.querySelectorAll('.word').forEach((w,i)=>{
+    w.classList.add('clickable');
+    w.onclick = ()=> onWordClick(i);
+  });
+}
+function onWordClick(idx){
+  if(clickedConfirmed) return;
+  if(selectedWordIndex === idx){
+    // İkinci kez tıklanırsa onay sorusu
+    if(confirm(`"${words[idx]}" kelimesini seçtiniz. Puanınız eklensin mi?`)){
+      clickedConfirmed = true;
+      selectedWordIndex = idx;
+      updateAfterSelection(idx);
+      saveHistory(idx);
+      updateScore(idx + 1); // idx 0 tabanlı kelime sayısı için +1
+      removeClickable();
+    }
+  } else {
+    // İlk tıklama, seçili yap ve uyarı göster
+    if(selectedWordIndex >= 0){
+      // Önceki seçiliyi temizle
+      storyBox.querySelectorAll('.word')[selectedWordIndex].classList.remove('selected');
+    }
+    selectedWordIndex = idx;
+    storyBox.querySelectorAll('.word')[idx].classList.add('selected');
+    afterInfo.textContent = `Kelime seçtiniz: "${words[idx]}". Onaylamak için aynı kelimeye tekrar tıklayın.`;
+    afterInfo.style.display = 'block';
+  }
+}
+
+function updateAfterSelection(idx){
+  afterInfo.textContent = `Seçilen kelime: "${words[idx]}". Puanınız eklendi.`;
+}
+
+function saveHistory(idx){
+  const now = new Date();
+  const item = {
+    date: now.toLocaleString(),
+    storyId: storySelect.value,
+    storyTitle: currentTitle.textContent,
+    wordCount: idx + 1,
+  };
+  history.push(item);
+  localStorage.setItem('readHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function loadHistory(){
+  const stored = localStorage.getItem('readHistory');
+  if(stored){
+    history = JSON.parse(stored);
+    renderHistory();
+  }
+}
+
+function renderHistory(){
+  historyList.innerHTML = '';
+  if(history.length === 0){
+    historyList.textContent = 'Henüz kayıt yok.';
+    return;
+  }
+  history.forEach((h,i)=>{
+    const div = document.createElement('div');
+    div.textContent = `${h.date} - "${h.storyTitle}" - ${h.wordCount} kelime okundu`;
+    historyList.appendChild(div);
+  });
+}
+
+function clearHistory(){
+  const pwd = prompt('Geçmişi temizlemek için şifreyi giriniz:');
+  if(pwd === null) return; // iptal ettiyse çık
+  if(pwd !== '9498'){ // şifreyi istediğin gibi değiştir
+    alert('Şifre yanlış!');
+    return;
+  }
+  if(confirm('Tüm geçmişi silmek istediğinize emin misiniz?')){
+    history = [];
+    localStorage.removeItem('readHistory');
+    renderHistory();
+    // Skoru da sıfırlayalım
+    updateScore(0,true);
+  }
+}
+
+
+function startTest(){
+  if(running) return;
+  timeLeft = duration;
+  running = true;
+  updateTimerDisplay(timeLeft);
+  startBtn.disabled = true;
+  resetBtn.disabled = false;
+  storySelect.disabled = true;
+  document.querySelectorAll('input[name="duration"]').forEach(r=>r.disabled=true);
+  displayStory(STORIES.find(s=>s.id === storySelect.value).text);
+  // Zamanlayıcı başlat
+  timer = setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay(timeLeft);
+    if(timeLeft <= 0){
+      clearInterval(timer);
+      running = false;
+      startBtn.disabled = false;
+      resetBtn.disabled = false;
+      storySelect.disabled = false;
+      document.querySelectorAll('input[name="duration"]').forEach(r=>r.disabled=false);
+      afterInfo.textContent = 'Süre bitti! Şimdi okuduğunuz kelimeleri seçebilirsiniz.';
+      afterInfo.style.display = 'block';
+      makeWordsClickable();
+      // Arka plan mavi olsun
+      storyBox.style.backgroundColor = '#d0e7ff';
+    }
+  }, 1000);
+}
+
+function resetTest(){
+  if(timer) clearInterval(timer);
+  running = false;
+  startBtn.disabled = false;
+  resetBtn.disabled = true;
+  storySelect.disabled = false;
+  document.querySelectorAll('input[name="duration"]').forEach(r=>r.disabled=false);
+  timeLeft = duration;
+  updateTimerDisplay(timeLeft);
+  displayStory(STORIES.find(s=>s.id === storySelect.value).text);
+  afterInfo.style.display = 'none';
+  storyBox.style.backgroundColor = '#fff';
+  selectedWordIndex = -1;
+  clickedConfirmed = false;
+}
+
+function updateTimerDisplay(sec){
+  let m = Math.floor(sec/60);
+  let s = sec % 60;
+  timerDisplay.textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+/* --- Hikaye değiştirildiğinde --- */
+function onStoryChange(){
+  const selectedId = storySelect.value;
+  const story = STORIES.find(s=>s.id === selectedId);
+  if(story){
+    currentTitle.textContent = story.title;
+    displayStory(story.text);
+    resetTest();
+  }
+}
+
+/* --- Hikaye ekleme butonu --- */
+function toggleAddStory(){
+  if(storyAddContainer.style.display === 'flex'){
+    cancelAddStory();
+  } else {
+    storyAddContainer.style.display = 'flex';
+    storyAddContainer.setAttribute('aria-hidden', 'false');
+    newStoryTitle.value = '';
+    newStoryText.value = '';
+  }
+}
+function cancelAddStory(){
+  storyAddContainer.style.display = 'none';
+  storyAddContainer.setAttribute('aria-hidden', 'true');
+  newStoryTitle.value = '';
+  newStoryText.value = '';
+}
+
+function saveNewStory(){
+  const title = newStoryTitle.value.trim();
+  const text = newStoryText.value.trim();
+  if(title.length < 3){
+    alert('Başlık en az 3 karakter olmalı.');
+    return;
+  }
+  if(text.length < 10){
+    alert('Hikaye metni en az 10 karakter olmalı.');
+    return;
+  }
+  const id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g,'');
+  if(STORIES.some(s=>s.id === id)){
+    alert('Bu başlıkla zaten bir hikaye mevcut.');
+    return;
+  }
+  STORIES.push({id, title, text});
+  const option = document.createElement('option');
+  option.value = id;
+  option.textContent = title;
+  storySelect.appendChild(option);
+  storySelect.value = id;
+  displayStory(text);
+  currentTitle.textContent = title;
+  cancelAddStory();
+  resetTest();
+  alert('Hikaye başarıyla eklendi.');
+}
+
+/* --- Hikaye silme --- */
+function deleteSelectedStory(){
+  if(confirm('Seçili hikayeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')){
+    const selectedId = storySelect.value;
+    const idx = STORIES.findIndex(s=>s.id === selectedId);
+    if(idx>=0){
+      STORIES.splice(idx,1);
+      // Seçiliyi listeden kaldır
+      const option = storySelect.querySelector(`option[value="${selectedId}"]`);
+      if(option) option.remove();
+      if(STORIES.length>0){
+        storySelect.value = STORIES[0].id;
+        currentTitle.textContent = STORIES[0].title;
+        displayStory(STORIES[0].text);
+      } else {
+        storySelect.value = '';
+        currentTitle.textContent = '-';
+        storyBox.innerHTML = '';
+      }
+      resetTest();
+      alert('Hikaye silindi.');
+    }
+  }
+}
+
+/* --- Skor sistemi --- */
+function loadScore(){
+  const storedScore = localStorage.getItem('readingScore');
+  if(storedScore){
+    score = parseInt(storedScore);
+    updateScoreDisplay();
+  }
+}
+function updateScore(newScore, reset=false){
+  if(reset){
+    score = 0;
+  } else {
+    score += Math.floor(newScore/10); // her 10 kelime 1 puan
+  }
+  if(score<0) score=0;
+  localStorage.setItem('readingScore', score.toString());
+  updateScoreDisplay();
+}
+function updateScoreDisplay(){
+  scoreValue.textContent = score.toString();
+}
+
+</script>
+
+</body>
+</html>

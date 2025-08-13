@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sayı Sayma Oyunu</title>
+<style>
+  body {
+    background: #ffe6f0;
+    font-family: "Times New Roman", Times, serif;
+    color: #b30059;
+    padding: 30px 20px;
+    text-align: center;
+    min-height: 100vh;
+    position: relative;
+  }
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  .secenekler, .kontroller {
+    margin: 15px 0;
+  }
+  label {
+    margin: 0 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+  }
+  input[type=radio], input[type=checkbox], input[type=number] {
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 4px 6px;
+  }
+  button {
+    background-color: #ff99cc;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.3em;
+    padding: 12px 30px;
+    margin: 10px 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 8px rgba(255, 102, 180, 0.5);
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+  }
+  button:hover {
+    background-color: #ff66b3;
+  }
+  #puanKutusu {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+  }
+  #yanlisKutusu {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #f44336;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+  }
+  #dogruSabitiKutusu {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: #3a86ff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+  }
+  #ustBilgi {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #b30059;
+  }
+  #soruAlani {
+    font-size: 2em;
+    margin-top: 30px;
+    min-height: 60px;
+    font-weight: bold;
+  }
+  #cevapAlani {
+    margin-top: 20px;
+  }
+  .feedback {
+    font-size: 1.3em;
+    margin-top: 15px;
+    height: 30px;
+    font-weight: bold;
+  }
+  .dogru { color: green; }
+  .yanlis { color: red; }
+
+  .hidden {
+    display: none;
+  }
+
+  #cevapInput {
+    font-size: 1.8em;
+    padding: 8px 12px;
+    width: 150px;
+    border-radius: 8px;
+    border: 2px solid #b30059;
+    text-align: center;
+  }
+
+  /* Başlangıç sayısı inputu, geri sayma checkbox yanında hizalama */
+  #geriSayContainer {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 10px;
+  }
+  #baslangicSayisiInput {
+    width: 80px;
+    margin-left: 8px;
+    border: 2px solid #b30059;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    color: #b30059;
+    padding: 4px 6px;
+  }
+</style>
+</head>
+<body>
+
+<div id="yanlisKutusu">Yanlış: 0</div>
+<div id="puanKutusu">Puan: 0</div>
+<div id="dogruSabitiKutusu">Doğru: 0</div>
+
+<div id="ustBilgi" class="hidden"></div>
+
+<h1>Sayı Sayma Oyunu</h1>
+
+<div id="ayarlar">
+
+  <div class="secenekler">
+    <div>
+      <label><input type="radio" name="adim" value="1"> 1'er</label>
+      <label><input type="radio" name="adim" value="2" checked> 2'er</label>
+      <label><input type="radio" name="adim" value="3"> 3'er</label>
+      <label><input type="radio" name="adim" value="4"> 4'er</label>
+      <label><input type="radio" name="adim" value="5"> 5'er</label>
+      <label><input type="radio" name="adim" value="6"> 6'ar</label>
+      <label><input type="radio" name="adim" value="7"> 7'er</label>
+      <label><input type="radio" name="adim" value="8"> 8'er</label>
+      <label><input type="radio" name="adim" value="9"> 9'ar</label>
+      <label><input type="radio" name="adim" value="10"> 10'ar</label>
+    </div>
+  </div>
+
+  <div class="secenekler">
+    <p><strong>Zorluk Seç:</strong></p>
+    <label><input type="radio" name="zorluk" value="kolay" checked> Kolay</label>
+    <label><input type="radio" name="zorluk" value="zor"> Zor</label>
+  </div>
+
+  <div class="secenekler">
+    <p><strong>Cevap Şekli:</strong></p>
+    <label><input type="radio" name="cevapSekli" value="yazarak" checked> Yazarak</label>
+    <label><input type="radio" name="cevapSekli" value="secerek"> Seçerek</label>
+  </div>
+
+  <div class="secenekler" id="geriSayContainer">
+    <label><input type="checkbox" id="geriSayCheckbox"> Geri Say</label>
+    <input type="number" id="baslangicSayisiInput" placeholder="" min="0" />
+  </div>
+
+  <div class="kontroller">
+    <button id="baslaBtn">Başla</button>
+    <button id="anasayfaBtn">Ana Sayfa</button>
+  </div>
+</div>
+
+<div id="oyunAlani" class="hidden">
+  <div class="kontroller" style="margin-bottom: 15px;">
+    <div id="ustBilgiOyun"></div>
+    <button id="ayarlarBtn" style="background-color:#ff99cc; border:none; border-radius:12px; padding:8px 20px; font-size:1.1em; cursor:pointer;">Ayarlar</button>
+    <button id="anasayfaBtn2" style="background-color:#ff99cc; border:none; border-radius:12px; padding:8px 20px; font-size:1.1em; cursor:pointer; margin-left:10px;">Ana Menü</button>
+  </div>
+
+  <div id="soruAlani"></div>
+  <div id="cevapAlani"></div>
+  <div id="geriBildirim" class="feedback"></div>
+</div>
+
+<script>
+  let saymaAdim = 2;
+  let zorluk = "kolay";
+  let cevapSekli = "yazarak";
+  let kolaySayac = 0;
+  let soru = {};
+  let zorSoruSayi = 0;
+  let ustUsteYanlisSayisi = 0;
+  let geriSaymaModu = false;
+  let baslangicSayisi = null;
+
+  // LocalStorage'dan doğru sabitini oku, yoksa 0 yap
+  let dogruSabiti = parseInt(localStorage.getItem('dogruSabiti')) || 0;
+
+  const puanKutusu = document.getElementById('puanKutusu');
+  const yanlisKutusu = document.getElementById('yanlisKutusu');
+  const dogruSabitiKutusu = document.getElementById('dogruSabitiKutusu');
+  const soruAlani = document.getElementById('soruAlani');
+  const cevapAlani = document.getElementById('cevapAlani');
+  const geriBildirim = document.getElementById('geriBildirim');
+  const ustBilgiOyun = document.getElementById('ustBilgiOyun');
+  const geriSayCheckbox = document.getElementById('geriSayCheckbox');
+  const baslangicSayisiInput = document.getElementById('baslangicSayisiInput');
+
+  const kullaniciAdi = localStorage.getItem('cocukIsmi') || 'Çocuk';
+
+  function seslendir(mesaj) {
+    if (localStorage.getItem('sesliAnlatim') === 'true') {
+      const utterance = new SpeechSynthesisUtterance(mesaj);
+      utterance.lang = 'tr-TR';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function guncelleKutular() {
+    let puan = parseInt(localStorage.getItem('puan')) || 0;
+    let yanlis = parseInt(localStorage.getItem('yanlis')) || 0;
+    puanKutusu.textContent = 'Puan: ' + puan;
+    yanlisKutusu.textContent = 'Yanlış: ' + yanlis;
+    dogruSabitiKutusu.textContent = 'Doğru: ' + dogruSabiti;
+  }
+  window.onload = guncelleKutular;
+
+  document.getElementsByName('adim').forEach(radio => {
+    radio.addEventListener('change', e => {
+      saymaAdim = parseInt(e.target.value);
+    });
+  });
+
+  document.getElementsByName('zorluk').forEach(radio => {
+    radio.addEventListener('change', e => {
+      zorluk = e.target.value;
+    });
+  });
+
+  document.getElementsByName('cevapSekli').forEach(radio => {
+    radio.addEventListener('change', e => {
+      cevapSekli = e.target.value;
+    });
+  });
+
+  document.getElementById('anasayfaBtn').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+  document.getElementById('anasayfaBtn2').addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  document.getElementById('ayarlarBtn').addEventListener('click', () => {
+    document.getElementById('oyunAlani').classList.add('hidden');
+    document.getElementById('ayarlar').classList.remove('hidden');
+    ustBilgiOyun.textContent = '';
+    soruAlani.textContent = '';
+    cevapAlani.innerHTML = '';
+    geriBildirim.textContent = '';
+  });
+
+  document.getElementById('baslaBtn').addEventListener('click', () => {
+    ustUsteYanlisSayisi = 0;
+    // Artık oyun başında dogruSabiti sıfırlanmayacak!
+    localStorage.setItem('yanlis', 0);
+    geriBildirim.textContent = '';
+    document.getElementById('ayarlar').classList.add('hidden');
+    document.getElementById('oyunAlani').classList.remove('hidden');
+
+    geriSaymaModu = geriSayCheckbox.checked;
+    kolaySayac = 0;
+    zorSoruSayi = 0;
+
+    const girilenBaslangic = parseInt(baslangicSayisiInput.value);
+    if (!isNaN(girilenBaslangic) && zorluk === 'kolay') {
+      baslangicSayisi = girilenBaslangic;
+    } else {
+      baslangicSayisi = null;
+    }
+
+    ustBilgiOyun.textContent = saymaAdim + "'er Sayma";
+
+    guncelleKutular();
+    yeniSoru();
+  });
+
+  function yeniSoru() {
+    cevapAlani.innerHTML = '';
+    geriBildirim.textContent = '';
+
+    if (zorluk === 'kolay') {
+      if (geriSaymaModu) {
+        let soruSayi = (baslangicSayisi !== null) ? (baslangicSayisi - (kolaySayac * saymaAdim)) : (100 - (kolaySayac * saymaAdim));
+        let cevapSayi = (baslangicSayisi !== null) ? (baslangicSayisi - ((kolaySayac + 1) * saymaAdim)) : (100 - ((kolaySayac + 1) * saymaAdim));
+        if (cevapSayi < 0) cevapSayi = 0;
+        soru = {
+          soruMetni: `${soruSayi} önceki rakam kaç'tır?`,
+          cevap: cevapSayi
+        };
+      } else {
+        let onceki = (baslangicSayisi !== null) ? (baslangicSayisi + (kolaySayac * saymaAdim)) : (kolaySayac * saymaAdim);
+        let sonraki = (baslangicSayisi !== null) ? (baslangicSayisi + ((kolaySayac + 1) * saymaAdim)) : ((kolaySayac + 1) * saymaAdim);
+        soru = {
+          soruMetni: `${onceki} sonra hangi sayı gelir?`,
+          cevap: sonraki
+        };
+      }
+      kolaySayac++;
+    } else {
+      let rastgele = Math.floor(Math.random() * 99) + 1;
+      if (geriSaymaModu) {
+        let cevapSayi = rastgele - saymaAdim;
+        if (cevapSayi < 0) cevapSayi = 0;
+        soru = {
+          soruMetni: `${rastgele} önce hangi rakam gelir?`,
+          cevap: cevapSayi
+        };
+      } else {
+        let cevapSayi = rastgele + saymaAdim;
+        soru = {
+          soruMetni: `${rastgele} sonra hangi sayı gelir?`,
+          cevap: cevapSayi
+        };
+      }
+      zorSoruSayi++;
+    }
+
+    soruAlani.textContent = soru.soruMetni;
+
+    if (cevapSekli === 'yazarak') {
+      const form = document.createElement('form');
+      form.onsubmit = e => {
+        e.preventDefault();
+        kontrolEt();
+      };
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'cevapInput';
+      input.placeholder = 'Cevabınız';
+      input.autocomplete = 'off';
+      input.inputMode = 'numeric';
+      input.pattern = '[0-9]*';
+      input.required = true;
+      form.appendChild(input);
+      const btn = document.createElement('button');
+      btn.textContent = 'Gönder';
+      btn.type = 'submit';
+      form.appendChild(btn);
+      cevapAlani.appendChild(form);
+      input.focus();
+    } else {
+      let secenekler = [soru.cevap];
+      while (secenekler.length < 4) {
+        let rast = soru.cevap + Math.floor(Math.random() * 10 - 5);
+        if (!secenekler.includes(rast) && rast >= 0) secenekler.push(rast);
+      }
+      secenekler.sort(() => Math.random() - 0.5);
+      secenekler.forEach(s => {
+        const btn = document.createElement('button');
+        btn.textContent = s;
+        btn.onclick = () => kontrolEt(s);
+        cevapAlani.appendChild(btn);
+      });
+    }
+  }
+
+  function kontrolEt(secim = null) {
+    let girilen;
+    if (secim !== null) {
+      girilen = secim;
+    } else {
+      const input = document.getElementById('cevapInput');
+      if (!input) return;
+      girilen = parseInt(input.value);
+      if (isNaN(girilen)) {
+        geriBildirim.textContent = 'Lütfen sayı giriniz!';
+        geriBildirim.className = 'feedback yanlis';
+        seslendir(kullaniciAdi + ', lütfen sayı giriniz!');
+        return;
+      }
+    }
+
+    if (girilen === soru.cevap) {
+      geriBildirim.textContent = 'Doğru! Tebrikler ' + kullaniciAdi + '!';
+      geriBildirim.className = 'feedback dogru';
+      seslendir('Tebrikler ' + kullaniciAdi + ', doğru bildin!');
+      let puan = parseInt(localStorage.getItem('puan') || '0');
+      puan += 1;
+      localStorage.setItem('puan', puan);
+      localStorage.setItem('yanlis', 0);
+      ustUsteYanlisSayisi = 0;
+
+      dogruSabiti++; // Her doğru cevaptan artırıyoruz
+      localStorage.setItem('dogruSabiti', dogruSabiti); // localStorage'a kaydet
+      guncelleKutular();
+
+      setTimeout(() => {
+        yeniSoru();
+      }, 1500);
+    } else {
+      geriBildirim.textContent = 'Yanlış! ' + kullaniciAdi + ', tekrar dene.';
+      geriBildirim.className = 'feedback yanlis';
+      seslendir('Yanlış yaptın ' + kullaniciAdi + ', tekrar dene.');
+      let yanlis = parseInt(localStorage.getItem('yanlis') || '0');
+      yanlis++;
+      localStorage.setItem('yanlis', yanlis);
+      ustUsteYanlisSayisi++;
+      guncelleKutular();
+      if (ustUsteYanlisSayisi >= 3) {
+        let puan = parseInt(localStorage.getItem('puan') || '0');
+        puan = Math.max(0, puan - 1);
+        localStorage.setItem('puan', puan);
+        localStorage.setItem('yanlis', 0);
+        ustUsteYanlisSayisi = 0;
+        guncelleKutular();
+      }
+    }
+  }
+</script>
+
+</body>
+</html>

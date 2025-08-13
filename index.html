@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ana Menü</title>
+<style>
+  body {
+    background: #ffe6f0;
+    font-family: "Times New Roman", Times, serif;
+    color: #b30059;
+    padding: 30px 20px;
+    text-align: center;
+    min-height: 100vh;
+    position: relative;
+  }
+  h1 {
+    font-size: 3em;
+    margin-bottom: 30px;
+  }
+  button {
+    background-color: #ff99cc;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.3em;
+    padding: 14px 30px;
+    margin: 12px 10px;
+    cursor: pointer;
+    box-shadow: 0 5px 8px rgba(255, 102, 180, 0.5);
+    transition: background-color 0.3s ease;
+    min-width: 170px;
+  }
+  button:hover {
+    background-color: #ff66b3;
+  }
+  #puanKutusu {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.4em;
+    z-index: 1000;
+    user-select: none;
+    cursor: pointer;
+  }
+  #yanlisKutusu {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #f44336;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.4em;
+    z-index: 1000;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  /* Modal arkaplan */
+  #modalArkaPlan,
+  #modalAlisverisArkaPlan {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+  }
+
+  /* Modal pencere */
+  #modalPencere,
+  #modalAlisverisPencere {
+    background-color: #fff0f6;
+    margin: 80px auto;
+    padding: 20px 25px 60px 25px;
+    border-radius: 15px;
+    width: 320px;
+    box-shadow: 0 0 20px #b30059;
+    position: relative;
+    font-family: "Times New Roman", Times, serif;
+    color: #b30059;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  #modalPencere h2,
+  #modalAlisverisPencere h2 {
+    margin-top: 0;
+    text-align: center;
+  }
+  #modalPencere label,
+  #modalAlisverisPencere label {
+    display: block;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 1.1em;
+    text-align: left;
+  }
+  #modalPencere input[type="password"],
+  #modalPencere input[type="number"],
+  #modalPencere input[type="text"],
+  #modalAlisverisPencere input[type="text"],
+  #modalAlisverisPencere input[type="number"],
+  #modalAlisverisPencere input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 6px;
+    font-size: 1.1em;
+    border-radius: 8px;
+    border: 2px solid #b30059;
+    box-sizing: border-box;
+  }
+  #modalPencere button,
+  #modalAlisverisPencere button {
+    margin-top: 20px;
+    width: 100%;
+    font-size: 1.2em;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  #modalPencere .secenekBtn {
+    width: 48%;
+    margin: 10px 1% 0 1%;
+  }
+
+  /* Kapat butonu */
+  #modalKapatBtn,
+  #modalAlisverisKapatBtn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #b30059cc;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 8px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+  }
+  #modalKapatBtn:hover,
+  #modalAlisverisKapatBtn:hover {
+    color: #b30059;
+    background-color: #ffe6f0;
+  }
+
+  #modalMesaj {
+    margin-top: 10px;
+    font-weight: bold;
+    min-height: 24px;
+    text-align: center;
+  }
+
+  #puanEkleAlani {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  #puanEkleAlani input[type="number"] {
+    width: 60%;
+    min-width: 0;
+  }
+  #puanEkleAlani button {
+    width: 40%;
+    min-width: 0;
+    font-size: 1em;
+    padding: 10px 0;
+    border-radius: 8px;
+  }
+#alisverisBtn {
+  position: fixed;
+  bottom: 10px;
+  right: 5px;
+  background-color: #b30059;
+  color: white;
+  font-size: 1.2em;
+  padding: 5px 9px;
+  border-radius: 6px;
+  box-shadow: 0 4px 7px rgba(179, 0, 89, 0.8);
+  cursor: pointer;
+  z-index: 1001;
+  user-select: none;
+  transition: background-color 0.3s ease;
+}
+#alisverisBtn:hover {
+  background-color: #ff66b3;
+}
+
+  /* Alışveriş modal ürün listesi */
+  #urunListesi {
+    margin-top: 15px;
+  }
+  .urunItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #b30059;
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 10px;
+    background-color: #ffe6f0;
+  }
+  .urunItem img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #b30059;
+  }
+  .urunBilgi {
+    flex-grow: 1;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.1em;
+  }
+  .urunPuan {
+    color: #b30059;
+    font-weight: bold;
+  }
+  .urunAlBtn {
+    background-color: #b30059;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+  }
+  .urunAlBtn:hover {
+    background-color: #ff66b3;
+  }
+</style>
+</head>
+<body>
+
+<div id="yanlisKutusu" title="Yanlış sayısına tıklayın (5 kere)"></div>
+<div id="puanKutusu" title="Puan kutusuna tıklayın (1 kere)"></div>
+<button id="alisverisBtn" title="Alışveriş">🛒 Alışveriş</button>
+
+<h1>Ana Menü</h1>
+
+<button onclick="window.location.href='sayma.html'">Sayı Sayma Oyunu</button>
+<button onclick="window.location.href='toplama.html'">Toplama Oyunu</button>
+<button onclick="window.location.href='saysay.html'">Çıkarma Oyunu</button>
+<button onclick="window.location.href='bolme.html'">Bölme Oyunu</button>
+<button onclick="window.location.href='patpat.html'">Çarpma Oyunu</button>
+<button onclick="window.location.href='hız.html'">Hızlı Okuma Testi</button>
+
+<!-- Ebeveyn modali (eski modal) -->
+<div id="modalArkaPlan">
+  <div id="modalPencere">
+    <button id="modalKapatBtn" title="Kapat">Kapat</button>
+    <h2 id="modalBaslik">Ebeveyn Girişi</h2>
+
+    <div id="sifreAlani">
+      <label for="sifreInput">Şifre:</label>
+      <input type="password" id="sifreInput" autocomplete="new-password" />
+      <button id="sifreGonderBtn">Giriş Yap</button>
+    </div>
+
+    <div id="islemAlani" style="display:none;">
+      <button class="secenekBtn" id="puanSifirlaBtn">Puanı Sıfırla</button>
+      <button class="secenekBtn" id="gununPuaniVerBtn">Günün Puanını Ver (20 puan)</button>
+      <button class="secenekBtn" id="sifreDegistirBtn">Şifre Değiştir</button>
+
+      <div id="puanEkleAlani">
+        <input type="number" id="puanEkleInput" placeholder="Eklemek istediğiniz puan" min="1" />
+        <button id="puanEkleBtn">Puan Ekle</button>
+      </div>
+
+      <label for="cocukIsmiInput" style="margin-top: 20px; text-align:center;">Çocuk İsmi:</label>
+      <input type="text" id="cocukIsmiInput" placeholder="Çocuk ismini girin" maxlength="30" />
+      <button id="cocukIsmiKaydetBtn" style="margin-top: 10px; font-size: 1em;">İsmi Kaydet</button>
+
+      <div style="margin-top: 20px; text-align:center;">
+        <label style="font-weight:bold; font-size:1.1em; cursor:pointer;">
+          <input type="checkbox" id="sesliAnlatimToggle" />
+          Sesli Anlatımı Aç / Kapat
+        </label>
+      </div>
+
+      <!-- Yeni Ürün Ekleme Alanı -->
+      <hr style="margin: 25px 0; border-color: #b30059cc;">
+      <h3>Ürün Ekle</h3>
+      <label for="urunAdiInput">Ürün Adı:</label>
+      <input type="text" id="urunAdiInput" placeholder="Ürün adı girin" maxlength="50" />
+      <label for="urunPuanInput">Ürün Puanı:</label>
+      <input type="number" id="urunPuanInput" placeholder="Puan" min="1" max="9999" />
+      <label for="urunGorselInput">Ürün Görseli (jpg/png):</label>
+      <input type="file" id="urunGorselInput" accept="image/png, image/jpeg" />
+      <button id="urunEkleBtn">Ürünü Kaydet</button>
+      <div id="urunEkleMesaj" style="color:#b30059; margin-top:10px; font-weight:bold;"></div>
+    </div>
+
+    <div id="sifreDegistirAlani" style="display:none;">
+      <label for="yeniSifreInput">Yeni Şifre:</label>
+      <input type="password" id="yeniSifreInput" autocomplete="new-password" />
+      <button id="yeniSifreKaydetBtn">Şifreyi Kaydet</button>
+      <button id="iptalSifreDegistirBtn" style="margin-top: 10px; background-color: #b30059;">İptal</button>
+    </div>
+
+    <div id="modalMesaj"></div>
+  </div>
+</div>
+
+<!-- Alışveriş Modal -->
+<div id="modalAlisverisArkaPlan">
+  <div id="modalAlisverisPencere">
+    <button id="modalAlisverisKapatBtn" title="Kapat">Kapat</button>
+    <h2>Alışveriş</h2>
+    <div id="urunListesi">
+      <!-- Ürünler buraya JS ile eklenecek -->
+    </div>
+    <div id="alisverisMesaj" style="font-weight:bold; color:#b30059; margin-top: 15px; min-height: 24px;"></div>
+  </div>
+</div>
+
+<script>
+  // Mevcut kodlar ve değişkenler aynen duruyor, onları bozmadım.
+
+  const puanKutusu = document.getElementById('puanKutusu');
+  const yanlisKutusu = document.getElementById('yanlisKutusu');
+  const alisverisBtn = document.getElementById('alisverisBtn');
+
+  const modalArkaPlan = document.getElementById('modalArkaPlan');
+  const modalPencere = document.getElementById('modalPencere');
+  const modalKapatBtn = document.getElementById('modalKapatBtn');
+  const modalBaslik = document.getElementById('modalBaslik');
+  const sifreAlani = document.getElementById('sifreAlani');
+  const islemAlani = document.getElementById('islemAlani');
+  const sifreDegistirAlani = document.getElementById('sifreDegistirAlani');
+  const modalMesaj = document.getElementById('modalMesaj');
+
+  const sifreInput = document.getElementById('sifreInput');
+  const sifreGonderBtn = document.getElementById('sifreGonderBtn');
+  const puanSifirlaBtn = document.getElementById('puanSifirlaBtn');
+  const gununPuaniVerBtn = document.getElementById('gununPuaniVerBtn');
+  const sifreDegistirBtn = document.getElementById('sifreDegistirBtn');
+  const yeniSifreInput = document.getElementById('yeniSifreInput');
+  const yeniSifreKaydetBtn = document.getElementById('yeniSifreKaydetBtn');
+  const iptalSifreDegistirBtn = document.getElementById('iptalSifreDegistirBtn');
+
+  const puanEkleInput = document.getElementById('puanEkleInput');
+  const puanEkleBtn = document.getElementById('puanEkleBtn');
+  const cocukIsmiInput = document.getElementById('cocukIsmiInput');
+  const cocukIsmiKaydetBtn = document.getElementById('cocukIsmiKaydetBtn');
+
+  const sesliAnlatimToggle = document.getElementById('sesliAnlatimToggle');
+
+  // Yeni ürün ekleme elemanları
+  const urunAdiInput = document.getElementById('urunAdiInput');
+  const urunPuanInput = document.getElementById('urunPuanInput');
+  const urunGorselInput = document.getElementById('urunGorselInput');
+  const urunEkleBtn = document.getElementById('urunEkleBtn');
+  const urunEkleMesaj = document.getElementById('urunEkleMesaj');
+
+  // Alışveriş modal elemanları
+  const modalAlisverisArkaPlan = document.getElementById('modalAlisverisArkaPlan');
+  const modalAlisverisPencere = document.getElementById('modalAlisverisPencere');
+  const modalAlisverisKapatBtn = document.getElementById('modalAlisverisKapatBtn');
+  const urunListesi = document.getElementById('urunListesi');
+  const alisverisMesaj = document.getElementById('alisverisMesaj');
+
+  const PUAN_VERILME_SURESI = 24 * 60 * 60 * 1000; // 24 saat ms
+
+  // LocalStorage işlemleri (eklenen ürünler)
+  function urunleriGetir() {
+    const data = localStorage.getItem('urunler');
+    if (!data) return [];
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  function urunleriKaydet(urunler) {
+    localStorage.setItem('urunler', JSON.stringify(urunler));
+  }
+
+  // Satın alınan ürünleri sakla (isteğe bağlı, şimdilik sadece liste tutarız)
+  function alinanUrunleriGetir() {
+    const data = localStorage.getItem('alinanUrunler');
+    if (!data) return [];
+    try {
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+  function alinanUrunleriKaydet(alinanlar) {
+    localStorage.setItem('alinanUrunler', JSON.stringify(alinanlar));
+  }
+
+  // Puan ve yanlış sayısını güncelle (aynı eski kod)
+  function guncelleKutular() {
+    const puan = parseInt(localStorage.getItem('puan')) || 0;
+    const yanlis = parseInt(localStorage.getItem('yanlis')) || 0;
+    puanKutusu.textContent = 'Puan: ' + puan;
+    yanlisKutusu.textContent = 'Yanlış: ' + yanlis;
+  }
+
+  // Puan sıfırlama
+  function puanSifirla() {
+    localStorage.setItem('puan', 0);
+    guncelleKutular();
+    mesajVer("Puan başarıyla sıfırlandı.");
+  }
+
+  // Günün puanını verme
+  function gununPuaniniVer() {
+    const sonVerilmeZamani = localStorage.getItem('gununPuanVerilmeZamani');
+    const suankiZaman = Date.now();
+
+    if (sonVerilmeZamani && (suankiZaman - sonVerilmeZamani) < PUAN_VERILME_SURESI) {
+      const kalanMs = PUAN_VERILME_SURESI - (suankiZaman - sonVerilmeZamani);
+      const kalanSaat = Math.floor(kalanMs / (1000 * 60 * 60));
+      const kalanDakika = Math.floor((kalanMs % (1000 * 60 * 60)) / (1000 * 60));
+      mesajVer(`Günün puanı zaten verilmiş. Tekrar verebilmek için ${kalanSaat} saat ${kalanDakika} dakika beklemelisiniz.`);
+      return;
+    }
+    localStorage.setItem('puan', 20);
+    localStorage.setItem('gununPuanVerilmeZamani', suankiZaman);
+    guncelleKutular();
+    const isim = cocukIsmiGetir();
+    mesajVer(`${isim}, günün puanını başarıyla kazandın! Puan 20 olarak ayarlandı.`);
+  }
+
+  // Modal mesajı göster
+  function mesajVer(mesaj) {
+    modalMesaj.textContent = mesaj;
+  }
+
+  // Modal açma ve kapama fonksiyonları (ebeveyn)
+  function modalAc() {
+    modalArkaPlan.style.display = 'block';
+    modalMesaj.textContent = '';
+    yeniSifreInput.value = '';
+    sifreInput.value = '';
+    puanEkleInput.value = '';
+    cocukIsmiInput.value = cocukIsmiGetir();
+    sesliAnlatimToggle.checked = sesliAnlatimGetir();
+
+    sifreAlani.style.display = 'block';
+    islemAlani.style.display = 'none';
+    sifreDegistirAlani.style.display = 'none';
+
+    if (!sifreGetir()) {
+      modalBaslik.textContent = "Yeni Şifre Belirleyin";
+      sifreGonderBtn.textContent = "Şifreyi Kaydet";
+    } else {
+      modalBaslik.textContent = "Ebeveyn Girişi";
+      sifreGonderBtn.textContent = "Giriş Yap";
+    }
+    urunEkleMesaj.textContent = '';
+    urunAdiInput.value = '';
+    urunPuanInput.value = '';
+    urunGorselInput.value = '';
+  }
+  function modalKapat() {
+    modalArkaPlan.style.display = 'none';
+  }
+
+  // --- Ürün ekleme fonksiyonu ---
+  urunEkleBtn.addEventListener('click', () => {
+    const ad = urunAdiInput.value.trim();
+    const puan = parseInt(urunPuanInput.value);
+    const gorselInput = urunGorselInput.files[0];
+
+    if (!ad) {
+      urunEkleMesaj.textContent = "Lütfen ürün adını girin.";
+      return;
+    }
+    if (!puan || puan <= 0) {
+      urunEkleMesaj.textContent = "Lütfen geçerli bir puan girin.";
+      return;
+    }
+    if (!gorselInput) {
+      urunEkleMesaj.textContent = "Lütfen ürün görseli seçin.";
+      return;
+    }
+    if (!['image/png', 'image/jpeg'].includes(gorselInput.type)) {
+      urunEkleMesaj.textContent = "Yalnızca PNG veya JPG formatında görsel seçebilirsiniz.";
+      return;
+    }
+
+    // Görseli base64 olarak oku
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const base64 = e.target.result;
+
+      let urunler = urunleriGetir();
+      urunler.push({ ad, puan, gorsel: base64 });
+      urunleriKaydet(urunler);
+
+      urunEkleMesaj.style.color = "#4CAF50";
+      urunEkleMesaj.textContent = `"${ad}" ürünü eklendi.`;
+      urunAdiInput.value = '';
+      urunPuanInput.value = '';
+      urunGorselInput.value = '';
+      // Alışveriş listesini güncelle
+      if (modalAlisverisArkaPlan.style.display === 'block') {
+        listeyiGuncelle();
+      }
+    };
+    reader.readAsDataURL(gorselInput);
+  });
+
+  // Alışveriş modal aç/kapat
+  alisverisBtn.addEventListener('click', () => {
+    listeyiGuncelle();
+    modalAlisverisArkaPlan.style.display = 'block';
+    alisverisMesaj.textContent = '';
+  });
+  modalAlisverisKapatBtn.addEventListener('click', () => {
+    modalAlisverisArkaPlan.style.display = 'none';
+  });
+
+  // Alışveriş ürün listesini göster
+  function listeyiGuncelle() {
+    const urunler = urunleriGetir();
+    const puan = parseInt(localStorage.getItem('puan')) || 0;
+    urunListesi.innerHTML = '';
+    if (urunler.length === 0) {
+      urunListesi.innerHTML = '<p>Henüz ürün eklenmemiş.</p>';
+      return;
+    }
+    urunler.forEach((urun, i) => {
+      const item = document.createElement('div');
+      item.className = 'urunItem';
+
+      const img = document.createElement('img');
+      img.src = urun.gorsel;
+      img.alt = urun.ad;
+
+      const bilgi = document.createElement('div');
+      bilgi.className = 'urunBilgi';
+      bilgi.textContent = urun.ad;
+
+      const puanSpan = document.createElement('div');
+      puanSpan.className = 'urunPuan';
+      puanSpan.textContent = urun.puan + ' puan';
+
+      const alBtn = document.createElement('button');
+      alBtn.className = 'urunAlBtn';
+      alBtn.textContent = 'Satın Al';
+      alBtn.disabled = puan < urun.puan;
+      if (puan < urun.puan) {
+        alBtn.title = 'Yeterli puanınız yok.';
+      } else {
+        alBtn.title = 'Satın al';
+      }
+      alBtn.addEventListener('click', () => {
+        satinAl(i);
+      });
+
+      item.appendChild(img);
+      item.appendChild(bilgi);
+      item.appendChild(puanSpan);
+      item.appendChild(alBtn);
+      urunListesi.appendChild(item);
+    });
+  }
+
+  // Satın alma fonksiyonu
+  function satinAl(index) {
+    const urunler = urunleriGetir();
+    const puan = parseInt(localStorage.getItem('puan')) || 0;
+    const urun = urunler[index];
+
+    if (!urun) return;
+    if (puan < urun.puan) {
+      alisverisMesaj.textContent = 'Yeterli puanınız yok!';
+      return;
+    }
+    // Puan düşür
+    localStorage.setItem('puan', puan - urun.puan);
+    guncelleKutular();
+
+    // Alınan ürünleri kaydet
+    let alinanlar = alinanUrunleriGetir();
+    alinanlar.push(urun);
+    alinanUrunleriKaydet(alinanlar);
+
+    alisverisMesaj.style.color = "#4CAF50";
+    alisverisMesaj.textContent = `"${urun.ad}" başarıyla satın alındı!`;
+    listeyiGuncelle();
+  }
+
+  // Diğer mevcut event listener'lar
+  modalKapatBtn.addEventListener('click', modalKapat);
+
+  puanKutusu.addEventListener('click', e => {
+    e.preventDefault();
+  });
+
+  let yanlisTiklamaSayaci = 0;
+  let dogruTiklamaSayaci = 0;
+  yanlisKutusu.addEventListener('click', () => {
+    yanlisTiklamaSayaci++;
+    if (yanlisTiklamaSayaci > 5) {
+      yanlisTiklamaSayaci = 1;
+    }
+    kontrolEt();
+  });
+
+  sifreGonderBtn.addEventListener('click', () => {
+    const mevcutSifre = sifreGetir();
+    const girilenSifre = sifreInput.value.trim();
+
+    if (!girilenSifre) {
+      mesajVer("Lütfen şifreyi girin.");
+      return;
+    }
+    if (!mevcutSifre) {
+      sifreKaydet(girilenSifre);
+      mesajVer("Şifre kaydedildi. Lütfen tekrar giriş yapın.");
+      sifreInput.value = '';
+      modalBaslik.textContent = "Ebeveyn Girişi";
+      sifreGonderBtn.textContent = "Giriş Yap";
+      return;
+    }
+    if (girilenSifre === mevcutSifre) {
+      sifreAlani.style.display = 'none';
+      islemAlani.style.display = 'block';
+      sifreDegistirAlani.style.display = 'none';
+      modalMesaj.textContent = '';
+    } else {
+      mesajVer("Yanlış şifre! Tekrar deneyin.");
+    }
+  });
+
+  puanSifirlaBtn.addEventListener('click', puanSifirla);
+
+  gununPuaniVerBtn.addEventListener('click', gununPuaniniVer);
+
+  sifreDegistirBtn.addEventListener('click', () => {
+    sifreAlani.style.display = 'none';
+    islemAlani.style.display = 'none';
+    sifreDegistirAlani.style.display = 'block';
+    modalMesaj.textContent = '';
+  });
+
+  yeniSifreKaydetBtn.addEventListener('click', () => {
+    const yeniSifre = yeniSifreInput.value.trim();
+    if (!yeniSifre) {
+      mesajVer("Lütfen yeni şifreyi girin.");
+      return;
+    }
+    sifreKaydet(yeniSifre);
+    mesajVer("Şifre başarıyla değiştirildi.");
+    sifreDegistirAlani.style.display = 'none';
+    islemAlani.style.display = 'block';
+    sifreInput.value = '';
+  });
+
+  iptalSifreDegistirBtn.addEventListener('click', () => {
+    sifreDegistirAlani.style.display = 'none';
+    islemAlani.style.display = 'block';
+    modalMesaj.textContent = '';
+  });
+
+  puanEkleBtn.addEventListener('click', () => {
+    let eklenecekPuan = parseInt(puanEkleInput.value);
+    if (isNaN(eklenecekPuan) || eklenecekPuan <= 0) {
+      mesajVer("Lütfen geçerli bir pozitif sayı girin.");
+      return;
+    }
+    let mevcutPuan = parseInt(localStorage.getItem('puan')) || 0;
+    localStorage.setItem('puan', mevcutPuan + eklenecekPuan);
+    guncelleKutular();
+    mesajVer(`${eklenecekPuan} puan başarıyla eklendi.`);
+    puanEkleInput.value = '';
+  });
+
+  cocukIsmiKaydetBtn.addEventListener('click', () => {
+    let isim = cocukIsmiInput.value.trim();
+    if (!isim) {
+      mesajVer("Lütfen çocuk ismini girin.");
+      return;
+    }
+    cocukIsmiKaydet(isim);
+    mesajVer(`Çocuk ismi "${isim}" olarak kaydedildi.`);
+  });
+
+  sesliAnlatimToggle.addEventListener('change', () => {
+    sesliAnlatimKaydet(sesliAnlatimToggle.checked);
+  });
+
+  // Gizli tıklama sayacı ve kontrol fonksiyonu (aynı)
+  function kontrolEt() {
+    if (yanlisTiklamaSayaci === 5) {
+      modalAc();
+      yanlisTiklamaSayaci = 0;
+      dogruTiklamaSayaci = 0;
+    }
+    if (dogruTiklamaSayaci === 1) {
+      localStorage.setItem('puan', 0);
+      localStorage.setItem('yanlis', 0);
+      guncelleKutular();
+      dogruTiklamaSayaci = 0;
+    }
+  }
+
+  // LocalStorage ile şifre ve diğer değerler alma/ayarlama fonksiyonları (aynı)
+  function sifreGetir() {
+    return localStorage.getItem('ebeveynSifre');
+  }
+  function sifreKaydet(sifre) {
+    localStorage.setItem('ebeveynSifre', sifre);
+  }
+
+  function cocukIsmiGetir() {
+    return localStorage.getItem('cocukIsmi') || "Çocuk";
+  }
+  function cocukIsmiKaydet(isim) {
+    localStorage.setItem('cocukIsmi', isim);
+  }
+
+  function sesliAnlatimGetir() {
+    const val = localStorage.getItem('sesliAnlatim');
+    return val === 'true';
+  }
+  function sesliAnlatimKaydet(deger) {
+    localStorage.setItem('sesliAnlatim', deger ? 'true' : 'false');
+  }
+
+  // Sayfa yüklenince puan ve yanlış kutuları güncelle
+  window.onload = () => {
+    if (localStorage.getItem('puan') === null) localStorage.setItem('puan', 0);
+    if (localStorage.getItem('yanlis') === null) localStorage.setItem('yanlis', 0);
+    if (localStorage.getItem('sesliAnlatim') === null) localStorage.setItem('sesliAnlatim', 'true');
+    guncelleKutular();
+  };
+</script>
+
+</body>
+</html>

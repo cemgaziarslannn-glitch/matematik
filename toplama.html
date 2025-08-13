@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Toplama Oyunu</title>
+<style>
+  body {
+    background: #ffe6f0;
+    font-family: "Times New Roman", Times, serif;
+    color: #b30059;
+    padding: 30px 20px;
+    text-align: center;
+    min-height: 100vh;
+    position: relative;
+  }
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+  }
+  .secenekler, .kontroller {
+    margin: 15px 0;
+  }
+  label {
+    margin: 0 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+  }
+  input[type=radio] {
+    cursor: pointer;
+  }
+  button {
+    background-color: #ff99cc;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.3em;
+    padding: 12px 30px;
+    margin: 10px 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 8px rgba(255, 102, 180, 0.5);
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+  }
+  button:hover {
+    background-color: #ff66b3;
+  }
+  #puanKutusu {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+  }
+  #yanlisKutusu {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: #f44336;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+    user-select:none;
+  }
+  /* Sağ alt köşedeki doğru sayısı kutusu */
+  #dogruSayisiKutusu {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.2em;
+    z-index: 1000;
+    user-select: none;
+  }
+  #islemAlani {
+    font-family: monospace;
+    font-size: 2.5em;
+    text-align: right;
+    width: 200px;
+    margin: 40px auto 10px auto;
+    line-height: 1.2;
+    min-height: 120px;
+  }
+  #altCizgi {
+    border-bottom: 3px solid #b30059;
+    margin-top: 0.2em;
+  }
+  #cevapAlani {
+    margin-top: 20px;
+  }
+  .feedback {
+    font-size: 1.3em;
+    margin-top: 15px;
+    height: 30px;
+    font-weight: bold;
+  }
+  .dogru { color: green; }
+  .yanlis { color: red; }
+  #butonlarAlani {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+  #butonlarAlani button {
+    min-width: 110px;
+    padding: 10px 15px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(255, 102, 180, 0.6);
+  }
+
+  /* Ebeveyn menüsü stili */
+  #ebeveynMenu {
+    display: none;
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 3px solid #b30059;
+    border-radius: 20px;
+    padding: 30px;
+    width: 320px;
+    z-index: 2000;
+    box-shadow: 0 8px 20px rgba(179,0,89,0.7);
+    text-align: left;
+  }
+  #ebeveynMenu h2 {
+    margin-top: 0;
+    color: #b30059;
+    text-align: center;
+  }
+  #ebeveynMenu label {
+    font-weight: bold;
+    display: block;
+    margin: 15px 0 5px 0;
+  }
+  #ebeveynMenu input[type="number"],
+  #ebeveynMenu input[type="checkbox"] {
+    transform: scale(1.3);
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  #ebeveynMenu button {
+    margin-top: 20px;
+    width: 100%;
+    font-size: 1.2em;
+  }
+  #sifreModal {
+    display:none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.6);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+  }
+  #sifreModal > div {
+    background: white;
+    border-radius: 15px;
+    padding: 25px 35px;
+    max-width: 280px;
+    text-align: center;
+  }
+  #sifreModal input {
+    font-size: 1.3em;
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    border: 2px solid #b30059;
+    border-radius: 10px;
+    text-align: center;
+  }
+  #sifreModal button {
+    margin-top: 15px;
+    font-size: 1.2em;
+    background-color: #b30059;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  #sifreModal button:hover {
+    background-color: #870045;
+  }
+</style>
+</head>
+<body>
+
+<div id="yanlisKutusu" title="Ebeveyn menüsünü açmak için 5 kez tıklayın">Yanlış: 0</div>
+<div id="puanKutusu">Puan: 0</div>
+<div id="dogruSayisiKutusu">Doğru: 0</div>
+
+<h1>Toplama Oyunu</h1>
+
+<div class="secenekler" id="ayarlarAlani">
+  <p><strong>Basamak Seç:</strong></p>
+  <label><input type="radio" name="basamak" value="1" checked> Bir Basamaklı</label>
+  <label><input type="radio" name="basamak" value="2"> İki Basamaklı</label>
+
+  <p><strong> Cevap Şekli:</strong></p>
+  <label><input type="radio" name="cevapSekli" value="yazarak" checked> Yazarak</label>
+  <label><input type="radio" name="cevapSekli" value="secerek"> Seçerek</label>
+</div>
+
+<div class="kontroller" id="kontrollerAlani">
+  <button id="baslaBtn">Başla</button>
+  <button id="anasayfaBtnAyarlarda">Ana Menü</button>
+</div>
+
+<div id="islemAlani" style="display:none;">
+  <div id="sayi1"></div>
+  <div><span style="padding-right: 0.3em;">+</span><span id="sayi2"></span></div>
+  <div id="altCizgi"></div>
+</div>
+
+<div id="cevapAlani"></div>
+<div id="geriBildirim" class="feedback"></div>
+
+<div id="butonlarAlani" style="display:none;">
+  <button id="ayarlarBtn">Ayarlar</button>
+  <button id="anasayfaBtn">Ana Menü</button>
+</div>
+
+<!-- Ebeveyn Menüsü -->
+<div id="ebeveynMenu">
+  <h2>Ebeveyn Menüsü</h2>
+  <label for="dogruCevapSayisiInput">Kaç doğru cevapta +1 puan verilsin?</label>
+  <input type="number" id="dogruCevapSayisiInput" min="1" max="10" />
+
+  <label>
+    <input type="checkbox" id="oyunAcikCheckbox" />
+    Oyunu Aç / Kapat
+  </label>
+
+  <button id="ebeveynKaydetBtn">Kaydet</button>
+</div>
+
+<!-- Şifre Modal -->
+<div id="sifreModal" style="display:flex;">
+  <div>
+    <div><strong>Şifreyi Giriniz</strong></div>
+    <input type="password" id="sifreInput" autocomplete="off" />
+    <button id="sifreOnayBtn">Onayla</button>
+  </div>
+</div>
+
+<script>
+  const cocukIsmi = localStorage.getItem('cocukIsmi') || "Jayden";
+
+  // Ebeveyn menüsündeki ayarlar için sayfaya özel prefix
+  const ayarPrefix = 'toplama_';
+
+  const dogruCumleler = [
+    isim => `Aferin, ${isim}.`,
+    isim => `${isim}, bir puan daha kazandın.`,
+    isim => `Sen çok başarılı bir öğrencisindir, ${isim}.`,
+    isim => `${isim}, harika gidiyorsun!`,
+    isim => `Çok iyi, ${isim}, devam et!`
+  ];
+
+  function yanlisCumle(isim) {
+    return `${isim}, bu soruyu tekrar denemelisin.`;
+  }
+
+  let basamak = "1";
+  let cevapSekli = "yazarak";
+  let soru = {};
+  let ustUsteYanlis = 0;
+
+  // Bu 2 ayar ebeveyn menüsünden, sayfaya özel olarak alınıyor ve kaydediliyor
+  let dogruCevapSayisiIcinPuanArti = parseInt(localStorage.getItem(ayarPrefix + 'dogruCevapSayisiIcinPuanArti')) || 1;
+  let oyunDurumu = localStorage.getItem(ayarPrefix + 'oyunDurumu') || 'acik'; // 'acik' veya 'kapali'
+
+  // DOM elemanları
+  const puanKutusu = document.getElementById('puanKutusu');
+  const yanlisKutusu = document.getElementById('yanlisKutusu');
+  const islemAlani = document.getElementById('islemAlani');
+  const sayi1Div = document.getElementById('sayi1');
+  const sayi2Span = document.getElementById('sayi2');
+  const cevapAlani = document.getElementById('cevapAlani');
+  const geriBildirim = document.getElementById('geriBildirim');
+  const ayarlarAlani = document.getElementById('ayarlarAlani');
+  const kontrollerAlani = document.getElementById('kontrollerAlani');
+
+  const anasayfaBtnAyarlarda = document.getElementById('anasayfaBtnAyarlarda');
+  const anasayfaBtn = document.getElementById('anasayfaBtn');
+  const ayarlarBtn = document.getElementById('ayarlarBtn');
+  const butonlarAlani = document.getElementById('butonlarAlani');
+
+  // Ebeveyn menüsü ve şifre modal elemanları
+  const ebeveynMenu = document.getElementById('ebeveynMenu');
+  const dogruCevapSayisiInput = document.getElementById('dogruCevapSayisiInput');
+  const oyunAcikCheckbox = document.getElementById('oyunAcikCheckbox');
+  const ebeveynKaydetBtn = document.getElementById('ebeveynKaydetBtn');
+  const sifreModal = document.getElementById('sifreModal');
+  const sifreInput = document.getElementById('sifreInput');
+  const sifreOnayBtn = document.getElementById('sifreOnayBtn');
+
+  // DÜZELTİLDİ: Ses açık mı kontrolü
+  function sesAcikMi() {
+    return localStorage.getItem('sesliAnlatim') === 'true';
+  }
+
+  function sesliSoyle(mesaj) {
+    if (!sesAcikMi()) return;
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(mesaj);
+      utterance.lang = 'tr-TR';
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function guncelleKutular() {
+    let puan = parseInt(localStorage.getItem('puan') || '0');
+    let yanlis = parseInt(localStorage.getItem('yanlis') || '0');
+    let toplamDogru = parseInt(localStorage.getItem('toplamDogru') || '0');
+
+    puanKutusu.textContent = 'Puan: ' + puan;
+    yanlisKutusu.textContent = 'Yanlış: ' + yanlis;
+
+    // Ayrı sayaç: toplam doğru, azalmıyor
+    document.getElementById('dogruSayisiKutusu').textContent = 'Doğru: ' + toplamDogru;
+  }
+
+  window.onload = () => {
+    if(localStorage.getItem('puan') === null) localStorage.setItem('puan', 0);
+    if(localStorage.getItem('yanlis') === null) localStorage.setItem('yanlis', 0);
+    if(localStorage.getItem('toplamDogru') === null) localStorage.setItem('toplamDogru', 0);
+
+    // Ebeveyn menüsündeki inputları güncelle
+    dogruCevapSayisiInput.value = dogruCevapSayisiIcinPuanArti;
+    oyunAcikCheckbox.checked = oyunDurumu === 'acik';
+
+    guncelleKutular();
+
+    // Şifre modalı kapalı başlasın
+    sifreModal.style.display = 'none';
+  };
+
+  Array.from(document.getElementsByName('basamak')).forEach(radio => {
+    radio.addEventListener('change', e => {
+      basamak = e.target.value;
+    });
+  });
+
+  Array.from(document.getElementsByName('cevapSekli')).forEach(radio => {
+    radio.addEventListener('change', e => {
+      cevapSekli = e.target.value;
+    });
+  });
+
+  anasayfaBtnAyarlarda.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  anasayfaBtn.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+
+  ayarlarBtn && ayarlarBtn.addEventListener('click', () => {
+    ayarlarAlani.style.display = 'block';
+    kontrollerAlani.style.display = 'flex';
+    islemAlani.style.display = 'none';
+    cevapAlani.innerHTML = '';
+    geriBildirim.textContent = '';
+    butonlarAlani.style.display = 'none';
+  });
+
+  document.getElementById('baslaBtn').addEventListener('click', () => {
+    if (oyunDurumu === 'kapali') {
+      alert('Oyun şu anda kapalıdır. Lütfen ebeveyn menüsünden açınız.');
+      return;
+    }
+    ayarlarAlani.style.display = 'none';
+    kontrollerAlani.style.display = 'none';
+    islemAlani.style.display = 'block';
+    geriBildirim.textContent = '';
+    butonlarAlani.style.display = 'flex';
+    baslaOyunu();
+  });
+
+  function rastgeleSayi(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function baslaOyunu() {
+    yeniSoru();
+  }
+
+  function yeniSoru() {
+    cevapAlani.innerHTML = '';
+    geriBildirim.textContent = '';
+
+    let s1, s2, toplam;
+    if (basamak === "1") {
+      s1 = rastgeleSayi(1, 99);
+      s2 = rastgeleSayi(1, 10);
+    } else {
+      s1 = rastgeleSayi(1, 99);
+      s2 = rastgeleSayi(1, 99);
+    }
+    toplam = s1 + s2;
+
+    soru = {
+      sayi1: s1,
+      sayi2: s2,
+      cevap: toplam
+    };
+
+    sayi1Div.textContent = s1;
+    sayi2Span.textContent = s2;
+
+    if (cevapSekli === 'yazarak') {
+      const form = document.createElement('form');
+      form.onsubmit = e => {
+        e.preventDefault();
+        kontrolEt();
+      };
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = 'cevapInput';
+      input.placeholder = 'Cevabınız';
+      input.autocomplete = 'off';
+      input.inputMode = 'numeric';
+      input.pattern = '[0-9]*';
+      input.required = true;
+      input.style.fontSize = '1.8em';
+      input.style.padding = '8px 12px';
+      input.style.width = '120px';
+      form.appendChild(input);
+
+      const gonderBtn = document.createElement('button');
+      gonderBtn.textContent = 'Gönder';
+      gonderBtn.type = 'submit';
+      form.appendChild(gonderBtn);
+
+      cevapAlani.appendChild(form);
+      input.focus();
+    } else {
+      let secenekler = [soru.cevap];
+      while (secenekler.length < 4) {
+        let rast = soru.cevap + Math.floor(Math.random() * 10 - 5);
+        if (!secenekler.includes(rast) && rast >= 0) secenekler.push(rast);
+      }
+      secenekler.sort(() => Math.random() - 0.5);
+      secenekler.forEach(s => {
+        const btn = document.createElement('button');
+        btn.textContent = s;
+        btn.onclick = () => kontrolEt(s);
+        cevapAlani.appendChild(btn);
+      });
+    }
+  }
+
+  function kontrolEt(secim = null) {
+    let girilen;
+    if (secim !== null) {
+      girilen = secim;
+    } else {
+      const input = document.getElementById('cevapInput');
+      if (!input) return;
+      girilen = parseInt(input.value);
+      if (isNaN(girilen)) {
+        geriBildirim.textContent = 'Lütfen sayı giriniz!';
+        geriBildirim.className = 'feedback yanlis';
+        return;
+      }
+    }
+
+    if (girilen === soru.cevap) {
+      // Doğru sayısı artışı (puan değil!)
+      let toplamDogru = parseInt(localStorage.getItem('toplamDogru') || '0') + 1;
+      localStorage.setItem('toplamDogru', toplamDogru);
+
+      // Puan artışı sadece belirlenen sayıda doğru cevaptan sonra 1 puan artacak
+      if (toplamDogru % dogruCevapSayisiIcinPuanArti === 0) {
+        let puan = parseInt(localStorage.getItem('puan') || '0') + 1;
+        localStorage.setItem('puan', puan);
+      }
+
+      ustUsteYanlis = 0;
+
+      let puan = parseInt(localStorage.getItem('puan') || '0');
+      const mesaj = dogruCumleler[(puan - 1) % dogruCumleler.length](cocukIsmi);
+
+      geriBildirim.textContent = mesaj;
+      geriBildirim.className = 'feedback dogru';
+      sesliSoyle(mesaj);
+      guncelleKutular();
+
+      setTimeout(() => {
+        yeniSoru();
+      }, 1000);
+    } else {
+      let yanlis = parseInt(localStorage.getItem('yanlis') || '0') + 1;
+      localStorage.setItem('yanlis', yanlis);
+      ustUsteYanlis++;
+
+      const mesaj = yanlisCumle(cocukIsmi);
+      geriBildirim.textContent = mesaj;
+      geriBildirim.className = 'feedback yanlis';
+      sesliSoyle(mesaj);
+
+      if (ustUsteYanlis >= 3) {
+        let puan = parseInt(localStorage.getItem('puan') || '0');
+        if (puan > 0) {
+          localStorage.setItem('puan', puan - 1);
+        }
+        ustUsteYanlis = 0;
+        localStorage.setItem('yanlis', 0);
+      }
+      guncelleKutular();
+
+      if (cevapSekli === 'yazarak') {
+        const input = document.getElementById('cevapInput');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      }
+    }
+  }
+
+  // Yanlış kutusuna 5 kez tıklanınca ebeveyn menüsünü açmak için sayaç
+  let yanlisTiklamaSayaci = 0;
+  yanlisKutusu.addEventListener('click', () => {
+    yanlisTiklamaSayaci++;
+    if (yanlisTiklamaSayaci === 5) {
+      yanlisTiklamaSayaci = 0;
+      // Şifre modalını göster
+      sifreModal.style.display = 'flex';
+      sifreInput.value = '';
+      sifreInput.focus();
+    }
+    // 2 saniye içinde tekrar tıklanmazsa sayacı sıfırla
+    setTimeout(() => {
+      yanlisTiklamaSayaci = 0;
+    }, 2000);
+  });
+
+  // Şifre onaylama butonu
+  sifreOnayBtn.addEventListener('click', () => {
+    const dogruSayiKutusu = document.getElementById('dogruSayisiKutusu');
+    const dogruSayiStr = dogruSayiKutusu.textContent.replace(/[^0-9]/g, ''); // sadece rakamları al
+    const sifreGirilen = sifreInput.value.trim();
+
+    if (sifreGirilen === dogruSayiStr) {
+      // Şifre doğru, ebeveyn menüsünü aç
+      sifreModal.style.display = 'none';
+      ebeveynMenuAc();
+    } else {
+      alert('Şifre yanlış!');
+      sifreInput.value = '';
+      sifreInput.focus();
+    }
+  });
+
+  // Enter tuşu ile şifre onayı
+  sifreInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      sifreOnayBtn.click();
+    }
+  });
+
+  function ebeveynMenuAc() {
+    // Mevcut ayarları inputlara koy
+    dogruCevapSayisiInput.value = dogruCevapSayisiIcinPuanArti;
+    oyunAcikCheckbox.checked = (oyunDurumu === 'acik');
+
+    ebeveynMenu.style.display = 'block';
+  }
+
+  ebeveynKaydetBtn.addEventListener('click', () => {
+    // Yeni ayarları al
+    let yeniPuanArtis = parseInt(dogruCevapSayisiInput.value);
+    if (isNaN(yeniPuanArtis) || yeniPuanArtis < 1) {
+      alert('Lütfen 1 veya daha büyük bir sayı giriniz.');
+      dogruCevapSayisiInput.focus();
+      return;
+    }
+    dogruCevapSayisiIcinPuanArti = yeniPuanArtis;
+    localStorage.setItem(ayarPrefix + 'dogruCevapSayisiIcinPuanArti', dogruCevapSayisiIcinPuanArti);
+
+    oyunDurumu = oyunAcikCheckbox.checked ? 'acik' : 'kapali';
+    localStorage.setItem(ayarPrefix + 'oyunDurumu', oyunDurumu);
+
+    ebeveynMenu.style.display = 'none';
+    alert('Ayarlar kaydedildi.');
+  });
+</script>
+
+</body>
+</html>
